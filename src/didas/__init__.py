@@ -7,5 +7,3 @@ def dic(o):
         t = type(a)
         r[t].add(d)
     return dict(r)
-
-__version__ = "0.1"
