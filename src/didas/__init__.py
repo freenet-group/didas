@@ -1,5 +1,6 @@
 from collections import defaultdict
 
+
 def dic(o):
     r = defaultdict(set)
     for d in dir(o):
