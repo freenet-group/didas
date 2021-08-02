@@ -1,4 +1,5 @@
 import os
+
 import cx_Oracle
 import numpy as np
 from tqdm import tqdm
@@ -7,15 +8,20 @@ from tqdm import tqdm
 def get_engine():
     oracle_username = os.environ["oracle_username"]
     oracle_password = os.environ["oracle_password"]
-    oracle_port = os.environ["oracle_port"]
+    oracle_port = os.environ["oracle_portoracle_portoracle_portoracle_portoracle_portoracle_portoracle_portoracle_portoracle_portoracle_portoracle_portoracle_portoracle_portoracle_portoracle_portoracle_portoracle_portoracle_portoracle_portoracle_portoracle_portoracle_port"]
     oracle_servicename = os.environ["oracle_servicename"]
     orace_hosts = {v for k, v in os.environ.items() if k.startswith("oracle_host")}
     assert len(orace_hosts) > 0
     excs = dict()
     for oracle_host in orace_hosts:
-        dsn = cx_Oracle.makedsn(oracle_host, 1521, service_name=oracle_servicename)
+        dsn = cx_Oracle.makedsn(oracle_host, oracle_port, service_name=oracle_servicename)
         try:
-            return cx_Oracle.connect(user=oracle_username, password=oracle_password, dsn=dsn, encoding="UTF-8")
+            return cx_Oracle.connect(
+                user=oracle_username,
+                ***
+                dsn=dsn,
+                encoding="UTF-8",
+            )        
         except cx_Oracle.DatabaseError as e:
             excs[dsn] = e
     assert False, excs
@@ -492,4 +498,8 @@ def parallel(pd_table, conn, keys, data_iter):
 
 
 def typedict(df):
-    return {c: cx_Oracle.VARCHAR(4000) for c, t in df.dtypes.iteritems() if t == np.dtype("O")}
+    return {
+        c: cx_Oracle.VARCHAR(4000)
+        for c, t in df.dtypes.iteritems()
+        if t == np.dtype("O")
+    }
