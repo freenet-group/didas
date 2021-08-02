@@ -2,7 +2,8 @@
 requires = [
     "setuptools>=42",
     "wheel",
-    "numpy",
+    "cx-Oracle",
+    "pandas",
     "tqdm"
 ]
 build-backend = "setuptools.build_meta"
