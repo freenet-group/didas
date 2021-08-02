@@ -18,10 +18,10 @@ def get_engine():
         try:
             return cx_Oracle.connect(
                 user=oracle_username,
-                ***
+                password=oracle_password,
                 dsn=dsn,
                 encoding="UTF-8",
-            )        
+            )
         except cx_Oracle.DatabaseError as e:
             excs[dsn] = e
     assert False, excs
