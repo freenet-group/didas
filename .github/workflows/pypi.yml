@@ -20,8 +20,8 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
     - uses: actions/checkout@master
-    - run: echo "__version__ = \"${GITHUB_REF##*/}\"" >> src/didas/__init__.py
-    - run: cat src/didas/__init__.py
+    - run: echo "__version__ = \"${GITHUB_REF##*/}\"" >> didas/__init__.py
+    - run: cat didas/__init__.py
     - name: Set up Python 3.7
       uses: actions/setup-python@v1
       with:
