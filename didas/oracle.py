@@ -1,30 +1,28 @@
 import os
 
+import numpy as np
+from sqlalchemy import create_engine, String
 from sqlalchemy.exc import DatabaseError
 from sqlalchemy.engine import Engine
-import numpy as np
 from tqdm import tqdm
 
 
 def get_engine(
-    oracle_username:str = None,
-    oracle_password:str = None,
-    orace_hosts:list = None,
-    oracle_port:int = None,
-    oracle_servicename:str = None,
+    oracle_username: str = None,
+    oracle_password: str = None,
+    orace_hosts: set = set(),
+    oracle_port: int = None,
+    oracle_servicename: str = None,
 ) -> Engine:
     oracle_username = oracle_username or os.environ["ORACLE_USER"]
     oracle_password = oracle_password or os.environ["ORACLE_PASS"]
-    orace_hosts = orace_hosts or {v for k, v in os.environ.items() if k.startswith("ORACLE_HOST")}
+    orace_hosts |= {v for k, v in os.environ.items() if k.startswith("ORACLE_HOST")}
     oracle_port = oracle_port or int(os.environ["ORACLE_PORT"])
     oracle_servicename = oracle_servicename or os.environ["ORACLE_SERVICE_NAME"]
     assert len(orace_hosts) > 0
     excs = dict()
     for oracle_host in orace_hosts:
-        engine = create_engine(
-            f'oracle+cx_oracle://{oracle_username}:{oracle_password}@{oracle_host}:{oracle_port}/?service_name={oracle_servicename}',
-            max_identifier_length=128
-        )
+        engine = create_engine(f"oracle+cx_oracle://{oracle_username}:{oracle_password}@{oracle_host}:{oracle_port}/?service_name={oracle_servicename}", max_identifier_length=128)
         try:
             with engine.begin():
                 return engine
@@ -502,4 +500,4 @@ def parallel(pd_table, conn, keys, data_iter):
 
 
 def typedict(df):
-    return {c: cx_Oracle.VARCHAR(4000) for c, t in df.dtypes.iteritems() if t == np.dtype("O")}
+    return {c: String(4000) for c, t in df.dtypes.iteritems() if t == np.dtype("O")}
