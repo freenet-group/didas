@@ -1,29 +1,35 @@
 import os
 
-import cx_Oracle
+from sqlalchemy.exc import DatabaseError
+from sqlalchemy.engine import Engine
 import numpy as np
 from tqdm import tqdm
 
 
-def get_engine():
-    oracle_username = os.environ["oracle_username"]
-    oracle_password = os.environ["oracle_password"]
-    oracle_port = os.environ["oracle_port"]
-    oracle_servicename = os.environ["oracle_servicename"]
-    orace_hosts = {v for k, v in os.environ.items() if k.startswith("oracle_host")}
+def get_engine(
+    oracle_username:str = None,
+    oracle_password:str = None,
+    orace_hosts:list = None,
+    oracle_port:int = None,
+    oracle_servicename:str = None,
+) -> Engine:
+    oracle_username = oracle_username or os.environ["ORACLE_USER"]
+    oracle_password = oracle_password or os.environ["ORACLE_PASS"]
+    orace_hosts = orace_hosts or {v for k, v in os.environ.items() if k.startswith("ORACLE_HOST")}
+    oracle_port = oracle_port or int(os.environ["ORACLE_PORT"])
+    oracle_servicename = oracle_servicename or os.environ["ORACLE_SERVICE_NAME"]
     assert len(orace_hosts) > 0
     excs = dict()
     for oracle_host in orace_hosts:
-        dsn = cx_Oracle.makedsn(oracle_host, oracle_port, service_name=oracle_servicename)
+        engine = create_engine(
+            f'oracle+cx_oracle://{oracle_username}:{oracle_password}@{oracle_host}:{oracle_port}/?service_name={oracle_servicename}',
+            max_identifier_length=128
+        )
         try:
-            return cx_Oracle.connect(
-                user=oracle_username,
-                password=oracle_password,
-                dsn=dsn,
-                encoding="UTF-8",
-            )
-        except cx_Oracle.DatabaseError as e:
-            excs[dsn] = e
+            with engine.begin():
+                return engine
+        except DatabaseError as e:
+            excs[oracle_host] = e
     assert False, excs
 
 
