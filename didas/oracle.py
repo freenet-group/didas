@@ -1,9 +1,9 @@
 import os
 
 import numpy as np
-from sqlalchemy import create_engine, String
-from sqlalchemy.exc import DatabaseError
+from sqlalchemy import String, create_engine
 from sqlalchemy.engine import Engine
+from sqlalchemy.exc import DatabaseError
 from tqdm import tqdm
 
 
