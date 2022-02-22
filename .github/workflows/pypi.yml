@@ -8,45 +8,41 @@ jobs:
     name: Lint Code Base
     runs-on: ubuntu-20.04
     steps:
-    - uses: actions/checkout@v2
-    - name: Lint Code Base
-      uses: docker://ghcr.io/github/super-linter:slim-v4
-      env:
-        DEFAULT_BRANCH: main
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v2
+      - name: Lint Code Base
+        uses: docker://ghcr.io/github/super-linter:slim-v4
+        env:
+          DEFAULT_BRANCH: main
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build-n-publish:
     needs: linter
     name: Build and publish Python 🐍 distributions 📦 to PyPI and TestPyPI
     runs-on: ubuntu-18.04
     steps:
-    - uses: actions/checkout@master
-    - run: echo "__version__ = \"${GITHUB_REF##*/}\"" >> didas/__init__.py
-    - run: cat didas/__init__.py
-    - name: Set up Python 3.7
-      uses: actions/setup-python@v1
-      with:
-        python-version: 3.7
-    - name: Install pypa/build
-      run: >-
-        python -m
-        pip install
-        build
-        --user
-    - name: Build a binary wheel and a source tarball
-      run: >-
-        python -m
-        build
-        --sdist
-        --wheel
-        --outdir dist/
-        .
-    - run: |
-        import didas.oracle
-        didas.oracle.get_engine()
-      shell: python
-    - name: Publish distribution 📦 to PyPI
-      if: ${{ startsWith(github.ref, 'refs/tags') }}
-      uses: pypa/gh-action-pypi-publish@master
-      with:
-        password: ${{ secrets.PYPI_API_TOKEN }}
+      - uses: actions/checkout@master
+      - run: echo "__version__ = \"${GITHUB_REF##*/}\"" >> didas/__init__.py
+      - run: cat didas/__init__.py
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.7
+      - name: Install pypa/build
+        run: >-
+          python -m
+          pip install
+          build
+          --user
+      - name: Build a binary wheel and a source tarball
+        run: >-
+          python -m
+          build
+          --sdist
+          --wheel
+          --outdir dist/
+          .
+      - name: Publish distribution 📦 to PyPI
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+        uses: pypa/gh-action-pypi-publish@master
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}
