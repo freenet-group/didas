@@ -2,9 +2,9 @@ from collections import defaultdict
 
 
 def dic(o):
-    r = defaultdict(set)
+    r = defaultdict(dict)
     for d in dir(o):
         a = getattr(o, d)
         t = type(a)
-        r[t].add(d)
+        r[t][d] = a
     return dict(r)
