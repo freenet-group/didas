@@ -19,7 +19,7 @@ def get_engine(
     oracle_hosts |= {v for k, v in os.environ.items() if k.startswith("ORACLE_HOST")}
     oracle_port = oracle_port or int(os.environ["ORACLE_PORT"])
     oracle_servicename = oracle_servicename or os.environ["ORACLE_SERVICE_NAME"]
-    assert len(orace_hosts) > 0
+    assert len(oracle_hosts) > 0
     excs = dict()
     for oracle_host in oracle_hosts:
         engine = create_engine(f"oracle+cx_oracle://{oracle_username}:{oracle_password}@{oracle_host}:{oracle_port}/?service_name={oracle_servicename}", max_identifier_length=128)
