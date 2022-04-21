@@ -28,6 +28,7 @@ jobs:
           pip install
           build
           --user
+      - run: cat pyproject.toml
       - name: Build a binary wheel and a source tarball
         run: >-
           python -m
