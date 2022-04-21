@@ -24,7 +24,7 @@ jobs:
       - run: echo "__version__ = \"${GITHUB_REF##*/}\"" > didas/_version.py
       - run: cat didas/_version.py
       - name: Set up Python 3.7
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v3
         with:
           python-version: 3.7
       - name: Install pypa/build
