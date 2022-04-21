@@ -3,9 +3,12 @@ from collections import defaultdict
 try:
     from ._version import __version__
 except ImportError:
-    from setuptools_scm import get_version
+    try:
+        from setuptools_scm import get_version
 
-    __version__ = get_version()
+        __version__ = get_version()
+    except (ImportError, LookupError):
+        __version__ = "UNKNOWN"
 
 
 def dic(o):
