@@ -19,6 +19,7 @@ jobs:
         env:
           DEFAULT_BRANCH: main
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: pip install build
       - name: Build a binary wheel and a source tarball
         run: >-
           python -m
