@@ -1,4 +1,5 @@
 from collections import defaultdict
+from ._version import __version__
 
 
 def dic(o):
