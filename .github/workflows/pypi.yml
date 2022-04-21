@@ -8,12 +8,15 @@ env:
   PYTHONUNBUFFERED: true
 
 jobs:
-  linter:
+  job1:
     name: Lint Code Base
     runs-on: ubuntu-latest
     container: python:slim
     steps:
       - uses: actions/checkout@v3
+      - run: git tag
+      - run: git status
+      - run: git describe
       - name: Lint Code Base
         uses: docker://ghcr.io/github/super-linter:slim-v4
         env:
