@@ -7,6 +7,7 @@ except ImportError:
 
     __version__ = get_version(root="..", relative_to=__file__)
 
+
 def dic(o):
     r = defaultdict(dict)
     for d in dir(o):
