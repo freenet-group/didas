@@ -7,8 +7,8 @@ except ImportError:
         from setuptools_scm import get_version
 
         __version__ = get_version()
-    except (ImportError, LookupError):
-        __version__ = "UNKNOWN"
+    except (ImportError, LookupError) as e:
+        __version__ = str(e)
 
 
 def dic(o):
