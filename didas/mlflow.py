@@ -2,6 +2,7 @@ import os
 
 import google.auth.transport.requests
 import google.oauth2.id_token
+import mlflow.tracking
 
 
 def set_google_tracking_token(tracking_uri=None, tracking_token=None):
@@ -14,3 +15,7 @@ def set_google_tracking_token(tracking_uri=None, tracking_token=None):
         )
     else:
         os.environ["MLFLOW_TRACKING_TOKEN"] = tracking_token
+
+
+def get_latest_versions(model_name):
+    return {v.current_stage:v for v in mlflow.tracking.MlflowClient().get_latest_versions(model_name)}
