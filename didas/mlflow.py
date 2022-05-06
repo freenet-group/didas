@@ -18,4 +18,4 @@ def set_google_tracking_token(tracking_uri=None, tracking_token=None):
 
 
 def get_latest_versions(model_name):
-    return {v.current_stage:v for v in mlflow.tracking.MlflowClient().get_latest_versions(model_name)}
+    return {v.current_stage: v for v in mlflow.tracking.MlflowClient().get_latest_versions(model_name)}
