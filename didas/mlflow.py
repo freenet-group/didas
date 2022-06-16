@@ -3,6 +3,7 @@ import os
 import google.auth.transport.requests
 import google.oauth2.id_token
 import mlflow.tracking
+import pandas as pd
 
 
 def set_google_tracking_token(tracking_uri=None, tracking_token=None):
@@ -26,7 +27,7 @@ def get_latest_version(model_name):
     return versions[max(versions)]
 
 
-def runinfo(experiment_name):
+def run_info(experiment_name):
     experiment_ids = {e.name: e.experiment_id for e in mlflow.list_experiments()}
     all_runs = list()
     runs = mlflow.tracking.MlflowClient().search_runs([experiment_ids[experiment_name]], max_results=1000)
