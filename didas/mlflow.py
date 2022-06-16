@@ -24,3 +24,16 @@ def get_latest_versions(model_name):
 def get_latest_version(model_name):
     versions = {v.version: v for v in mlflow.tracking.MlflowClient().get_latest_versions(model_name)}
     return versions[max(versions)]
+
+
+def runinfo(experiment_name):
+    experiment_ids = {e.name: e.experiment_id for e in mlflow.list_experiments()}
+    all_runs = list()
+    runs = mlflow.tracking.MlflowClient().search_runs([experiment_ids[experiment_name]], max_results=1000)
+    all_runs += [run.to_dictionary() for run in runs]
+
+    while runs.token is not None:
+        runs = mlflow.tracking.MlflowClient().search_runs([experiment_ids[experiment_name]], page_token=runs.token)
+        all_runs += [run.to_dictionary() for run in runs]
+
+    return pd.json_normalize(all_runs)
