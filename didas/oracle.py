@@ -461,31 +461,6 @@ def norm_cols(df):
     df.columns = [norm_str(c) for c in df.columns]
 
 
-def compressed(pd_table, conn, keys, data_iter):
-    table_name = pd_table.name.upper()
-    if pd_table.schema:
-        table_name = f"{pd_table.schema}.{pd_table.name}".upper()
-    with conn.connection.cursor() as cur:
-        compress_table(table_name, cur, raise_if_not_exists=False)
-        columns = get_columns(table_name, cur)
-        KEYS = [k.upper() for k in keys]
-        if len(set(KEYS) & set(columns)) > 0:
-            columns_in_keys = [c for c in columns if c in KEYS]
-            ix_pos = [KEYS.index(c) for c in columns_in_keys]
-            sql = f"""
-                insert /*+ append, parallel (AUTO) */ into {table_name}
-                ({', '.join(columns_in_keys)})
-                values (:{', :'.join([str(ix) for ix in range(len(columns_in_keys))])})"""
-            # data = [[d[ix] for ix in ix_pos] for d in list(data_iter)]
-            data = []
-            for d in tqdm(data_iter):
-                data.append([d[ix] for ix in ix_pos])
-                if len(data) >= 1e4:
-                    cur.executemany(sql, data)
-                    data = []
-            cur.executemany(sql, data)
-
-
 def compressed_method(disable=False, buffer_size=1e4):
     def compressed(pd_table, conn, keys, data_iter):
         table_name = pd_table.name.upper()
@@ -510,6 +485,7 @@ def compressed_method(disable=False, buffer_size=1e4):
                         cur.executemany(sql, data)
                         data = []
                 cur.executemany(sql, data)
+
     return compressed
 
 
