@@ -484,7 +484,8 @@ def compressed_method(disable=False, buffer_size=1e4):
                     if len(data) >= buffer_size:
                         cur.executemany(sql, data)
                         data = []
-                cur.executemany(sql, data)
+                if len(data)>0:
+                    cur.executemany(sql, data)
 
     return compressed
 
