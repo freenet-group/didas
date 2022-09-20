@@ -504,4 +504,4 @@ def parallel(pd_table, conn, keys, data_iter):
 
 
 def typedict(df):
-    return {c: String(4000) for c, t in df.dtypes.iteritems() if t == np.dtype("O")}
+    return {c: String(4000) for c, t in df.dtypes.items() if t == np.dtype("O")}
