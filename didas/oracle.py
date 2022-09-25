@@ -477,14 +477,13 @@ def compressed_method(disable=False, buffer_size=1e4):
                     insert /*+ append, parallel (AUTO) */ into {table_name}
                     ({', '.join(columns_in_keys)})
                     values (:{', :'.join([str(ix) for ix in range(len(columns_in_keys))])})"""
-                # data = [[d[ix] for ix in ix_pos] for d in list(data_iter)]
                 data = []
                 for d in tqdm(data_iter, disable=disable):
                     data.append([d[ix] for ix in ix_pos])
                     if len(data) >= buffer_size:
                         cur.executemany(sql, data)
                         data = []
-                if len(data)>0:
+                if len(data) > 0:
                     cur.executemany(sql, data)
 
     return compressed
