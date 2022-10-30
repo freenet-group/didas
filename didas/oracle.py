@@ -502,5 +502,5 @@ def parallel(pd_table, conn, keys, data_iter):
         cur.executemany(sql, list(data_iter))
 
 
-def typedict(df):
-    return {c: String(4000) for c, t in df.dtypes.items() if t == np.dtype("O")}
+def typedict(df, string_length=4000):
+    return {c: String(string_length) for c, t in df.dtypes.items() if t == np.dtype("O")}
