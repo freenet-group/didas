@@ -6,7 +6,9 @@ import mlflow.tracking
 import pandas as pd
 
 
-def set_google_tracking_token(tracking_uri=None, tracking_token=None):
+def set_google_tracking_token(tracking_uri=None, tracking_token=None, google_application_credentials=None):
+    if google_application_credentials is not None:
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = google_application_credentials
     if tracking_uri is not None:
         os.environ["MLFLOW_TRACKING_URI"] = tracking_uri
     if tracking_token is None:
