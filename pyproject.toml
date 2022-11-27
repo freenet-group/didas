@@ -9,15 +9,7 @@ write_to_template = "__version__ = '{version}'\n"
 [project]
 name = "didas"
 dynamic = ["version"]
-author = "Georg Wendorf"
-author_email = "georgfriedrich.wendorf@md.de"
 description = "Python Commons for Didas"
-long_description = {file = "README.md"}
-long_description_content_type = "text/markdown"
-url = "https://github.com/freenet-group/didas/"
-project_urls = [
-    "Bug Tracker = https://github.com/freenet-group/didas/issues"
-]
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
