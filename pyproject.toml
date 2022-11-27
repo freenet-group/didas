@@ -8,7 +8,7 @@ write_to_template = "__version__ = '{version}'\n"
 
 [project]
 name = "didas"
-version = {attr = "didas.__version__"}
+dynamic = ["version"]
 author = "Georg Wendorf"
 author_email = "georgfriedrich.wendorf@md.de"
 description = "Python Commons for Didas"
