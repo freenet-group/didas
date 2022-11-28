@@ -5,3 +5,43 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools_scm]
 write_to = "didas/_version.py"
 write_to_template = "__version__ = '{version}'\n"
+
+[project]
+name = "didas"
+dynamic = ["version"]
+description = "Python Commons for Didas"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent"
+]
+dependencies = [
+    "cx-Oracle",
+    "SQLAlchemy",
+    "tqdm",
+    "google-auth",
+    "requests",
+    "pandas",
+    "mlflow-skinny",
+]
+authors = [
+  {name = "Georg Wendorf", email = "georgfriedrich.wendorf@freenet.ag"}
+]
+maintainers = [
+  {name = "Georg Wendorf", email = "georgfriedrich.wendorf@freenet.ag"}
+]
+readme = "README.md"
+requires-python = ">=3.6"
+
+[project.optional-dependencies]
+test = [
+  "pytest",
+  "black"
+]
+
+[project.urls]
+"Homepage" = "https://github.com/freenet-group/didas"
+documentation = "https://github.com/freenet-group/didas/blob/main/README.md"
+repository = "https://github.com/freenet-group/didas"
+changelog = "https://github.com/freenet-group/didas/releases"
+"Bug Tracker" = "https://github.com/freenet-group/didas/issues"
