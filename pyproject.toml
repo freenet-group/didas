@@ -48,7 +48,7 @@ mlflow = [
 
 [project.urls]
 "Homepage" = "https://github.com/freenet-group/didas"
-documentation = "https://github.com/freenet-group/didas/blob/main/README.md"
-repository = "https://github.com/freenet-group/didas"
-changelog = "https://github.com/freenet-group/didas/releases"
+"Documentation" = "https://github.com/freenet-group/didas/blob/main/README.md"
+"Repository" = "https://github.com/freenet-group/didas"
+"Changelog" = "https://github.com/freenet-group/didas/releases"
 "Bug Tracker" = "https://github.com/freenet-group/didas/issues"
