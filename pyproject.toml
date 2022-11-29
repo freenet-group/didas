@@ -37,7 +37,8 @@ dev = [
 oracle = [
     "cx-Oracle",
     "SQLAlchemy",
-    "tqdm"
+    "tqdm",
+    "numpy"
 ]
 mlflow = [
     "pandas",
