@@ -6,9 +6,9 @@
 
 ### PyPi
 
-`pip install didas`
+`pip install didas[mlflow,oracle]`
 
 ### GitHub
 
-`pip install git+https://github.com/freenet-group/didas@main`
+`pip install git+https://github.com/freenet-group/didas@main#egg=didas[mlflow,oracle]`
 

@@ -16,13 +16,6 @@ classifiers = [
     "Operating System :: OS Independent"
 ]
 dependencies = [
-    "cx-Oracle",
-    "SQLAlchemy",
-    "tqdm",
-    "google-auth",
-    "requests",
-    "pandas",
-    "mlflow-skinny",
 ]
 authors = [
   {name = "Georg Wendorf", email = "georgfriedrich.wendorf@freenet.ag"}
@@ -35,13 +28,27 @@ requires-python = ">=3.6"
 
 [project.optional-dependencies]
 test = [
-  "pytest",
-  "black"
+    "pytest"
+]
+dev = [
+    "black",
+    "flake8"
+]
+oracle = [
+    "cx-Oracle",
+    "SQLAlchemy",
+    "tqdm",
+    "numpy"
+]
+mlflow = [
+    "pandas",
+    "mlflow-skinny",
+    "google-auth"
 ]
 
 [project.urls]
 "Homepage" = "https://github.com/freenet-group/didas"
-documentation = "https://github.com/freenet-group/didas/blob/main/README.md"
-repository = "https://github.com/freenet-group/didas"
-changelog = "https://github.com/freenet-group/didas/releases"
+"Documentation" = "https://github.com/freenet-group/didas/blob/main/README.md"
+"Repository" = "https://github.com/freenet-group/didas"
+"Changelog" = "https://github.com/freenet-group/didas/releases"
 "Bug Tracker" = "https://github.com/freenet-group/didas/issues"
