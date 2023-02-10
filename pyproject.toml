@@ -35,7 +35,7 @@ dev = [
     "flake8"
 ]
 oracle = [
-    "cx-Oracle",
+    "oracledb",
     "SQLAlchemy",
     "tqdm",
     "numpy"
