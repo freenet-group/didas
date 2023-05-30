@@ -1,0 +1,4 @@
+{
+	"image": "mcr.microsoft.com/devcontainers/python",
+	"postCreateCommand": "pip install -e .[test,dev,oracle,mlflow]"
+}
