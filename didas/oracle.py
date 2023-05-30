@@ -8,17 +8,17 @@ from tqdm import tqdm
 
 
 def get_engine(
-    oracle_username: str = None,
-    oracle_password: str = None,
+    oracle_username: str = "",
+    oracle_password: str = "",
     oracle_hosts: set = set(),
-    oracle_port: int = None,
-    oracle_servicename: str = None,
+    oracle_port: int = -1,
+    oracle_servicename: str = "",
 ) -> Engine:
-    oracle_username = oracle_username or os.environ["ORACLE_USER"]
-    oracle_password = oracle_password or os.environ["ORACLE_PASS"]
+    oracle_username = oracle_username if oracle_username!="" else os.environ["ORACLE_USER"]
+    oracle_password = oracle_password if oracle_password!="" else os.environ["ORACLE_PASS"]
     oracle_hosts |= {v for k, v in os.environ.items() if k.startswith("ORACLE_HOST")}
-    oracle_port = oracle_port or int(os.environ["ORACLE_PORT"])
-    oracle_servicename = oracle_servicename or os.environ["ORACLE_SERVICE_NAME"]
+    oracle_port = oracle_port if oracle_port!=-1 else int(os.getenv("ORACLE_PORT", "1521"))
+    oracle_servicename = oracle_servicename if oracle_servicename!="" else os.environ["ORACLE_SERVICE_NAME"]
     assert len(oracle_hosts) > 0
     excs = dict()
     for oracle_host in oracle_hosts:
