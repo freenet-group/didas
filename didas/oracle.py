@@ -14,11 +14,11 @@ def get_engine(
     oracle_port: int = -1,
     oracle_servicename: str = "",
 ) -> Engine:
-    oracle_username = oracle_username if oracle_username!="" else os.environ["ORACLE_USER"]
-    oracle_password = oracle_password if oracle_password!="" else os.environ["ORACLE_PASS"]
+    oracle_username = oracle_username if oracle_username != "" else os.environ["ORACLE_USER"]
+    oracle_password = oracle_password if oracle_password != "" else os.environ["ORACLE_PASS"]
     oracle_hosts |= {v for k, v in os.environ.items() if k.startswith("ORACLE_HOST")}
-    oracle_port = oracle_port if oracle_port!=-1 else int(os.getenv("ORACLE_PORT", "1521"))
-    oracle_servicename = oracle_servicename if oracle_servicename!="" else os.environ["ORACLE_SERVICE_NAME"]
+    oracle_port = oracle_port if oracle_port != -1 else int(os.getenv("ORACLE_PORT", "1521"))
+    oracle_servicename = oracle_servicename if oracle_servicename != "" else os.environ["ORACLE_SERVICE_NAME"]
     assert len(oracle_hosts) > 0
     excs = dict()
     for oracle_host in oracle_hosts:
