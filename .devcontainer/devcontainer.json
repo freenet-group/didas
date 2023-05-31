@@ -1,0 +1,59 @@
+{
+	"image": "mcr.microsoft.com/devcontainers/python",
+	"containerEnv": {
+		"PROMPT_COMMAND": "history -a"
+	},
+	"customizations": {
+		"vscode": {
+			"settings": {
+				"update.showReleaseNotes": false,
+				"workbench.welcomePage.walkthroughs.openOnInstall": false,
+				"python.defaultInterpreterPath": "/usr/local/bin/python",
+				"python.linting.enabled": true,
+				"python.linting.flake8Enabled": true,
+				"python.linting.flake8Args": [
+					"--config=.github/linters/.flake8"
+				],
+				"python.formatting.blackArgs": [
+					"--config=.github/linters/.python-black"
+				],
+				"python.formatting.provider": "black",
+				"[python]": {
+					"editor.codeActionsOnSave": {
+						"source.organizeImports": true
+					}
+				},
+				"isort.args": [
+					"--settings-path",
+					".github/linters/.isort.cfg"
+				],
+				"editor.formatOnSave": true,
+				"git.autofetch": true,
+				"git.confirmSync": false,
+				"git.enableSmartCommit": true,
+				"python.testing.pytestEnabled": true,
+				"json.schemas": [
+					{
+						"fileMatch": [
+							"renovate.json"
+						],
+						"url": "https://docs.renovatebot.com/renovate-schema.json"
+					}
+				]
+			},
+			"extensions": [
+				"ms-python.python",
+				"ms-python.isort",
+				"ms-python.vscode-pylance",
+				"ms-python.flake8",
+				"ms-python.mypy-type-checker",
+				"GitHub.vscode-pull-request-github",
+				"ms-toolsai.jupyter",
+				"ms-toolsai.jupyter-renderers",
+				"ms-toolsai.jupyter-keymap",
+				"eamodio.gitlens"
+			]
+		}
+	},
+	"postCreateCommand": "pip install -e .[test,dev,oracle,mlflow]"
+}
