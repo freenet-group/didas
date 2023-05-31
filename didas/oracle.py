@@ -22,7 +22,7 @@ def get_engine(
     assert len(oracle_hosts) > 0
     excs = dict()
     for oracle_host in oracle_hosts:
-        engine = create_engine(f"oracle+oracledb://{oracle_username}:{oracle_password}@{oracle_host}:{oracle_port}/?service_name={oracle_servicename}", max_identifier_length=128)
+        engine = create_engine(f"oracle+oracledb://{oracle_username}:{oracle_password}@{oracle_host}:{oracle_port}/?service_name={oracle_servicename}")
         try:
             with engine.begin():
                 return engine
