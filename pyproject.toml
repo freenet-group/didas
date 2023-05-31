@@ -36,7 +36,7 @@ dev = [
 ]
 oracle = [
     "oracledb",
-    "SQLAlchemy",
+    "SQLAlchemy>=2",
     "tqdm",
     "numpy"
 ]
