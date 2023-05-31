@@ -3,9 +3,10 @@ import sys
 
 import numpy as np
 import oracledb
+import sqlalchemy as sa
 from sqlalchemy import String, create_engine
 from sqlalchemy.engine import Engine
-from sqlalchemy.exc import DatabaseError, NoSuchModuleError
+from sqlalchemy.exc import DatabaseError
 from tqdm import tqdm
 
 
@@ -23,23 +24,17 @@ def get_engine(
     oracle_servicename = oracle_servicename if oracle_servicename != "" else os.environ["ORACLE_SERVICE_NAME"]
     assert len(oracle_hosts) > 0
     excs = dict()
+    if sa.__version__.startswith("1."):
+        oracledb.version = "8.3.0"
+        sys.modules["cx_Oracle"] = oracledb
     for oracle_host in oracle_hosts:
-        try:
-            engine = create_engine(f"oracle+oracledb://{oracle_username}:{oracle_password}@{oracle_host}:{oracle_port}/?service_name={oracle_servicename}", max_identifier_length=128)
-        except NoSuchModuleError:
-            _sqlalchemy1workaround()
-            engine = create_engine(f"oracle+oracledb://{oracle_username}:{oracle_password}@{oracle_host}:{oracle_port}/?service_name={oracle_servicename}", max_identifier_length=128)
+        engine = create_engine(f"oracle+oracledb://{oracle_username}:{oracle_password}@{oracle_host}:{oracle_port}/?service_name={oracle_servicename}", max_identifier_length=128)
         try:
             with engine.begin():
                 return engine
         except DatabaseError as e:
             excs[oracle_host] = e
     assert False, excs
-
-
-def _sqlalchemy1workaround():
-    oracledb.version = "8.3.0"
-    sys.modules["cx_Oracle"] = oracledb
 
 
 def table_size(table_name, cur):
