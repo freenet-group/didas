@@ -46,6 +46,7 @@ jobs:
           --outdir dist/
           .
       - uses: softprops/action-gh-release@v1
+        if: github.event_name == 'release'
         with:
           files: dist/*
       - name: Publish distribution 📦 to PyPI
