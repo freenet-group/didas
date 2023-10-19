@@ -14,7 +14,7 @@ jobs:
     name: Lint Code Base
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Lint Code Base
         uses: super-linter/super-linter@v5
         env:
@@ -24,7 +24,7 @@ jobs:
     name: Build and publish Python 🐍 distributions 📦 to PyPI and TestPyPI
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: '0'
       - name: Set up Python 3.7
