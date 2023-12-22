@@ -13,7 +13,7 @@ def get_engine(
     oracle_hosts: set = set(),
     oracle_port: int = -1,
     oracle_servicename: str = "",
-    arraysize: int = None,
+    arraysize: int | None = None,
 ) -> Engine:
     oracle_username = oracle_username if oracle_username != "" else os.environ["ORACLE_USER"]
     oracle_password = oracle_password if oracle_password != "" else os.environ["ORACLE_PASS"]
