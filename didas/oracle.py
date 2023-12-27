@@ -13,6 +13,7 @@ def get_engine(
     oracle_hosts: set = set(),
     oracle_port: int = -1,
     oracle_servicename: str = "",
+    **kwargs,
 ) -> Engine:
     oracle_username = oracle_username if oracle_username != "" else os.environ["ORACLE_USER"]
     oracle_password = oracle_password if oracle_password != "" else os.environ["ORACLE_PASS"]
@@ -22,7 +23,10 @@ def get_engine(
     assert len(oracle_hosts) > 0
     excs = dict()
     for oracle_host in oracle_hosts:
-        engine = create_engine(f"oracle+oracledb://{oracle_username}:{oracle_password}@{oracle_host}:{oracle_port}/?service_name={oracle_servicename}")
+        engine = create_engine(
+            f"oracle+oracledb://{oracle_username}:{oracle_password}@{oracle_host}:{oracle_port}/?service_name={oracle_servicename}",
+            **kwargs,
+        )
         try:
             with engine.begin():
                 return engine
