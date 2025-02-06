@@ -1,16 +1,20 @@
+import logging
 import os
 import warnings
+from math import ceil
 from typing import Any, Callable, Dict, Iterator, List, Optional, Set, Tuple, Union
 
 import numpy as np
 import pandas as pd
 from oracle_reseved_word_list import reserverd_words
 from pandas import DataFrame
-from sqlalchemy import String, create_engine
+from sqlalchemy import String, create_engine, inspect, types
 from sqlalchemy.engine import Connection, Engine
 from sqlalchemy.exc import DatabaseError
 from sqlalchemy.sql import text
-from tqdm import tqdm
+from tqdm.auto import tqdm
+
+logger = logging.getLogger(__name__)
 
 
 def get_engine(
@@ -194,7 +198,7 @@ def compressed_method(
 def parallel(pd_table: Any, conn: Connection, keys: List[str], data_iter: Iterator[Tuple[Any, ...]]) -> None:
     warnings.warn(
         "The 'parallel' function is deprecated and will be removed in a future version. "
-        "Please use 'execute_parallel_insert' instead.",
+        "Please use 'execute_parallel_insert' or 'write_pandas_to_dwh' instead.",
         DeprecationWarning,
         stacklevel=2,
     )
@@ -221,3 +225,70 @@ def execute_parallel_insert(pd_table: Any, conn: Connection, keys: List[str], da
 def typedict(df: DataFrame, string_length: int = 4000) -> Dict[str, String]:
     """Create a dictionary with the column names as keys and the types as values."""
     return {c: String(string_length) for c, t in df.dtypes.items() if t == np.dtype("O")}
+
+
+def write_pandas_to_dwh(
+    df: pd.DataFrame,
+    table_name: str,
+    schema: Optional[str] = None,
+    create_table: bool = True,
+    engine: Optional[Engine] = None,
+    arraysize: int = 50000,
+    compress_for: Optional[str] = None,
+    grant_select_to: Optional[List[str]] = None,
+):
+    table_name = table_name.upper()
+    df.columns = df.columns.str.upper()
+    if engine is None:
+        engine = get_engine(arraysize=arraysize)
+    table_exists = inspect(engine).has_table(table_name)
+
+    if table_exists and create_table:
+        logger.error(f"Table {table_name} exists, please delete first.")
+        return False
+
+    elif create_table:
+        d_types = {c: types.VARCHAR(min(df[c].str.len().max(), 127)) for c in df.columns[df.dtypes == "object"].tolist()}
+        # Create the table if it doesn't exist
+        df.head(0).to_sql(table_name, con=engine, schema=schema, if_exists="fail", index=False, dtype=d_types)
+        logger.info(f"Table {table_name} created.")
+        # Commit the transaction to ensure the table is created
+        with engine.connect() as conn:
+            conn.connection.commit()
+
+    columns = df.columns
+    column_names = ", ".join(str(c) for c in columns)
+    column_values = ", ".join(f":{c}" for c in columns)
+
+    if schema:
+        table_name = f"{schema.upper()}.{table_name}"
+    sql_insert = f"INSERT /*+ parallel (AUTO) */ INTO {table_name} ({column_names}) VALUES ({column_values})"
+    batch_size = 100000
+    number_of_batches = ceil(len(df) / batch_size)
+    with engine.connect() as conn:
+        cursor = conn.connection.cursor()
+
+        for batch_df in tqdm(np.array_split(df, number_of_batches), total=number_of_batches):
+            data_to_insert = batch_df.replace({np.nan: None}).to_dict(orient="records")
+            try:
+                cursor.executemany(sql_insert, data_to_insert)
+            except Exception as e:
+                logger.error(f"Failed Insert SQL: {sql_insert} with error: {e}")
+                return False
+
+            conn.connection.commit()
+
+        if compress_for is not None:
+            logger.info("Compressing table...")
+            try:
+                compress_table(table_name=table_name, cur=cursor, compress_for=compress_for)
+            finally:
+                cursor.close()
+        else:
+            cursor.close()
+        # Optionally, grant select permissions
+        if grant_select_to is not None:
+            for user in grant_select_to:
+                logger.info(f"Granting SELECT permissions to {user}")
+                conn.execute(text(f"GRANT SELECT ON {table_name} TO {user}"))
+    return True
