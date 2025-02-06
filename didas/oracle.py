@@ -1,12 +1,14 @@
 import os
-from typing import Any, Dict, Iterator, List, Optional, Set, Tuple, Union
+from typing import Any, Callable, Dict, Iterator, List, Optional, Set, Tuple, Union
 
 import numpy as np
+import pandas as pd
 from oracle_reseved_word_list import reserverd_words
 from pandas import DataFrame
 from sqlalchemy import String, create_engine
 from sqlalchemy.engine import Connection, Engine
 from sqlalchemy.exc import DatabaseError
+from sqlalchemy.sql import text
 from tqdm import tqdm
 
 
@@ -15,7 +17,7 @@ def get_engine(
     oracle_password: Optional[str] = None,
     oracle_hosts: Optional[Set[str]] = None,
     oracle_port: Optional[int] = None,
-    oracle_servicename: Optional[Set[str]] = None,
+    oracle_servicename: Optional[str] = None,
     **kwargs: Any,
 ) -> Engine:
     """
@@ -55,15 +57,17 @@ def get_engine(
     assert False, excs
 
 
-def table_size(table_name: str, cur: Connection) -> int:
+def table_size(table_name: str, cur: Any) -> int:
     """Get the size of a table in bytes."""
     r = cur.execute(
-        f"""
-    SELECT sum(BYTES)
-    FROM DBA_SEGMENTS
-    WHERE SEGMENT_NAME = '{table_name.upper()}'
-    GROUP BY SEGMENT_NAME
-    """
+        text(
+            f"""
+        SELECT sum(BYTES)
+        FROM DBA_SEGMENTS
+        WHERE SEGMENT_NAME = '{table_name.upper()}'
+        GROUP BY SEGMENT_NAME
+        """
+        )
     )
     try:
         return next(r)[0]
@@ -72,14 +76,18 @@ def table_size(table_name: str, cur: Connection) -> int:
 
 
 def compress_table(
-    table_name: str, cur: Connection, compress_for: str = "ARCHIVE HIGH", force: bool = False, raise_if_not_exists: bool = True
+    table_name: str,
+    cur: Any,
+    compress_for: str = "ARCHIVE HIGH",
+    force: bool = False,
+    raise_if_not_exists: bool = True,
 ) -> Union[float, None]:
     """
     Compress a table.
 
     Args:
         table_name (str): The table name.
-        cur (Connection): The connection cursor.
+        cur (Any): The connection cursor.
         compress_for (str, optional): The compression level. Defaults to "ARCHIVE HIGH".
         force (bool, optional): Force the compression. Defaults to False.
         raise_if_not_exists (bool, optional): Raise if the table does not exist. Defaults to True.
@@ -88,11 +96,13 @@ def compress_table(
         Union[float, None]: The compression ratio.
     """
     r = cur.execute(
-        f"""
+        text(
+            f"""
         SELECT compression, compress_for
         FROM   user_tables
         WHERE  table_name = '{table_name.upper()}'
     """
+        )
     )
     try:
         compression, compress_for_now = next(r)
@@ -103,7 +113,7 @@ def compress_table(
             return None
     if compress_for_now != compress_for or force:
         size_before = table_size(table_name, cur)
-        cur.execute(f"ALTER TABLE {table_name} MOVE COMPRESS for {compress_for}")
+        cur.execute(text(f"ALTER TABLE {table_name} MOVE COMPRESS for {compress_for}"))
         try:
             return table_size(table_name, cur) / size_before
         except ZeroDivisionError:
@@ -111,14 +121,16 @@ def compress_table(
     return 1.0
 
 
-def get_columns(table_name: str, cur: Connection) -> List[str]:
+def get_columns(table_name: str, cur: Any) -> List[str]:
     """Get the columns of a table."""
     r = cur.execute(
-        f"""
+        text(
+            f"""
         SELECT column_name
         FROM all_tab_cols
         WHERE table_name = '{table_name.upper()}'
     """
+        )
     )
     return [row[0] for row in r]
 
@@ -143,14 +155,17 @@ def norm_cols(df: DataFrame) -> None:
     df.columns = [norm_str(c) for c in df.columns]
 
 
-def compressed_method(disable: bool = False, buffer_size: int = 10000) -> Any:
-    """Create a method that compresses the table and inserts the data."""
+def compressed_method(
+    disable: bool = False, buffer_size: Union[int, float] = 1e4
+) -> Callable[[pd.DataFrame, Connection, List[str], Iterator[Tuple[Any, ...]]], None]:
+    """Create a method that inserts data into a table in compressed mode."""
 
-    def compressed(pd_table: Any, conn: Connection, keys: List[str], data_iter: Iterator[Tuple[Any, ...]]) -> None:
+    def compressed(pd_table: pd.DataFrame, conn: Connection, keys: List[str], data_iter: Iterator[Tuple[Any, ...]]) -> None:
         table_name = pd_table.name.upper()
         if pd_table.schema:
             table_name = f"{pd_table.schema}.{pd_table.name}".upper()
-        with conn.connection.cursor() as cur:
+        cur = conn.connection.cursor()
+        try:
             compress_table(table_name, cur, raise_if_not_exists=False)
             columns = get_columns(table_name, cur)
             KEYS = [k.upper() for k in keys]
@@ -169,12 +184,14 @@ def compressed_method(disable: bool = False, buffer_size: int = 10000) -> Any:
                         data = []
                 if len(data) > 0:
                     cur.executemany(sql, data)
+        finally:
+            cur.close()
 
     return compressed
 
 
-def parallel(pd_table: Any, conn: Connection, keys: List[str], data_iter: Iterator[Tuple[Any, ...]]) -> None:
-    """Insert data into a table in parallel."""
+def execute_parallel_insert(pd_table: Any, conn: Connection, keys: List[str], data_iter: Iterator[Tuple[Any, ...]]) -> None:
+    """Insert data into a table in parallel mode."""
     table_name = pd_table.name.upper()
     if pd_table.schema:
         table_name = f"{pd_table.schema}.{pd_table.name}".upper()
@@ -183,8 +200,11 @@ def parallel(pd_table: Any, conn: Connection, keys: List[str], data_iter: Iterat
         ({', '.join(keys)})
         values (:{', :'.join([str(ix) for ix in range(len(keys))])})
     """
-    with conn.connection.cursor() as cur:
+    cur = conn.connection.cursor()
+    try:
         cur.executemany(sql, list(data_iter))
+    finally:
+        cur.close()
 
 
 def typedict(df: DataFrame, string_length: int = 4000) -> Dict[str, String]:
