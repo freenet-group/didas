@@ -236,7 +236,25 @@ def write_pandas_to_dwh(
     arraysize: int = 50000,
     compress_for: Optional[str] = None,
     grant_select_to: Optional[List[str]] = None,
-):
+) -> bool:
+    """
+    Write a pandas DataFrame to an Oracle table.
+
+    Args:
+        df (pd.DataFrame): The DataFrame to write.
+        table_name (str): The table name to write to.
+        schema (Optional[str], optional): The schema. Defaults to None.
+                                          If None, the table is created in the default schema.
+                                          If set, the table_name will be updated to schema.table_name.
+        create_table (bool, optional): Create the table if it doesn't exist. Defaults to True.
+        engine (Optional[Engine], optional): The Oracle engine. Defaults to None.
+        arraysize (int, optional): The array size. Defaults to 50000.
+        compress_for (Optional[str], optional): Compress the table. Defaults to None.
+        grant_select_to (Optional[List[str]], optional): Grant select permissions to the given users. Defaults to None.
+
+    Returns:
+        bool: True if the operation was successful.
+    """
     table_name = table_name.upper()
     df.columns = df.columns.str.upper()
     if engine is None:
