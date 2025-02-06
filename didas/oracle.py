@@ -105,12 +105,12 @@ def compress_table(
         )
     )
     try:
-        compression, compress_for_now = next(r)
+        _, compress_for_now = next(r)
     except StopIteration:
         if raise_if_not_exists:
             raise ValueError(f"Table {table_name.upper()} does not exist")
-        else:
-            return None
+        return None
+
     if compress_for_now != compress_for or force:
         size_before = table_size(table_name, cur)
         cur.execute(text(f"ALTER TABLE {table_name} MOVE COMPRESS for {compress_for}"))
