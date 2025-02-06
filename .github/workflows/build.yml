@@ -1,4 +1,3 @@
----
 name: Publish Python 🐍 distributions 📦 to PyPI
 
 on:
@@ -9,28 +8,25 @@ on:
   release:
     types: [published]
 
-jobs:
-  linter:
-    name: Lint Code Base
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Lint Code Base
-        uses: super-linter/super-linter@v5
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+permissions:
+  contents: read
+  packages: write
 
+jobs:
   build-n-publish:
     name: Build and publish Python 🐍 distributions 📦 to PyPI and TestPyPI
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: '0'
-      - name: Set up Python 3.7
+          fetch-depth: "0"
+      - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
-          python-version: 3.7
+          python-version: ${{ matrix.python-version }}
       - name: Install pypa/build
         run: >-
           python -m
@@ -45,7 +41,7 @@ jobs:
           --wheel
           --outdir dist/
           .
-      - uses: softprops/action-gh-release@v1
+      - uses: softprops/action-gh-release@v2
         if: github.event_name == 'release'
         with:
           files: dist/*
