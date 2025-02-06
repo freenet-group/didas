@@ -1,4 +1,5 @@
 import os
+import warnings
 from typing import Any, Callable, Dict, Iterator, List, Optional, Set, Tuple, Union
 
 import numpy as np
@@ -188,6 +189,16 @@ def compressed_method(
             cur.close()
 
     return compressed
+
+
+def parallel(pd_table: Any, conn: Connection, keys: List[str], data_iter: Iterator[Tuple[Any, ...]]) -> None:
+    warnings.warn(
+        "The 'parallel' function is deprecated and will be removed in a future version. "
+        "Please use 'execute_parallel_insert' instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return execute_parallel_insert(pd_table, conn, keys, data_iter)
 
 
 def execute_parallel_insert(pd_table: Any, conn: Connection, keys: List[str], data_iter: Iterator[Tuple[Any, ...]]) -> None:
