@@ -11,4 +11,3 @@
 ### GitHub
 
 `pip install git+https://github.com/freenet-group/didas@main#egg=didas[mlflow,oracle]`
-
