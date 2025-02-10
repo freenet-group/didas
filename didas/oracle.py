@@ -197,8 +197,7 @@ def compressed_method(
 
 def parallel(pd_table: Any, conn: Connection, keys: List[str], data_iter: Iterator[Tuple[Any, ...]]) -> None:
     warnings.warn(
-        "The 'parallel' function is deprecated and will be removed in a future version. "
-        "Please use 'execute_parallel_insert' or 'write_pandas_to_dwh' instead.",
+        "The 'parallel' function is deprecated and will be removed in a future version. Please use 'execute_parallel_insert' or 'write_pandas_to_dwh' instead.",
         DeprecationWarning,
         stacklevel=2,
     )
