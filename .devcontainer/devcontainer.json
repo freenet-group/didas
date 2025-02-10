@@ -1,59 +1,77 @@
 {
-	"image": "mcr.microsoft.com/devcontainers/python",
-	"containerEnv": {
-		"PROMPT_COMMAND": "history -a"
-	},
-	"customizations": {
-		"vscode": {
-			"settings": {
-				"update.showReleaseNotes": false,
-				"workbench.welcomePage.walkthroughs.openOnInstall": false,
-				"python.defaultInterpreterPath": "/usr/local/bin/python",
-				"python.linting.enabled": true,
-				"python.linting.flake8Enabled": true,
-				"python.linting.flake8Args": [
-					"--config=.github/linters/.flake8"
-				],
-				"python.formatting.blackArgs": [
-					"--config=.github/linters/.python-black"
-				],
-				"python.formatting.provider": "black",
-				"[python]": {
-					"editor.codeActionsOnSave": {
-						"source.organizeImports": true
-					}
-				},
-				"isort.args": [
-					"--settings-path",
-					".github/linters/.isort.cfg"
-				],
-				"editor.formatOnSave": true,
-				"git.autofetch": true,
-				"git.confirmSync": false,
-				"git.enableSmartCommit": true,
-				"python.testing.pytestEnabled": true,
-				"json.schemas": [
-					{
-						"fileMatch": [
-							"renovate.json"
-						],
-						"url": "https://docs.renovatebot.com/renovate-schema.json"
-					}
-				]
-			},
-			"extensions": [
-				"ms-python.python",
-				"ms-python.isort",
-				"ms-python.vscode-pylance",
-				"ms-python.flake8",
-				"ms-python.mypy-type-checker",
-				"GitHub.vscode-pull-request-github",
-				"ms-toolsai.jupyter",
-				"ms-toolsai.jupyter-renderers",
-				"ms-toolsai.jupyter-keymap",
-				"eamodio.gitlens"
-			]
-		}
-	},
-	"postCreateCommand": "pip install -e .[test,dev,oracle,mlflow]"
+  "image": "mcr.microsoft.com/devcontainers/python:3.12",
+  "remoteUser": "vscode",
+  "containerUser": "vscode",
+  "mounts": [
+    {
+      "source": "${localEnv:HOME}/.cache/pip",
+      "target": "/home/vscode/.cache/pip",
+      "type": "bind"
+    }
+  ],
+  "containerEnv": {
+    "PROMPT_COMMAND": "history -a"
+  },
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "update.showReleaseNotes": false,
+        "workbench.welcomePage.walkthroughs.openOnInstall": false,
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "flake8.args": ["--config=.github/linters/.flake8"],
+        "black-formatter.args": ["--config=.github/linters/.python-black"],
+        "pylint.args": ["--rcfile=.github/linters/.python-lint"],
+        "mypy.configFile": ".github/linters/.mypy.ini",
+        "files.associations": {
+          ".python-lint": "ini"
+        },
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "[python]": {
+          "editor.defaultFormatter": "ms-python.black-formatter",
+          "editor.codeActionsOnSave": {
+            "source.organizeImports": true
+          }
+        },
+        "isort.args": ["--settings-path", ".github/linters/.isort.cfg"],
+        "editor.formatOnSave": true,
+        "editor.detectIndentation": false,
+        "files.insertFinalNewline": true,
+        "git.autofetch": true,
+        "git.confirmSync": false,
+        "git.enableSmartCommit": true,
+        "git.useEditorAsCommitInput": false,
+        "python.testing.pytestEnabled": true,
+        "json.schemas": [
+          {
+            "fileMatch": ["renovate.json"],
+            "url": "https://docs.renovatebot.com/renovate-schema.json"
+          }
+        ]
+      },
+      "extensions": [
+        "ms-python.python",
+        "ms-python.black-formatter",
+        "ms-python.isort",
+        "ms-python.vscode-pylance",
+        "ms-python.flake8",
+        "matangover.mypy",
+        "GitHub.vscode-pull-request-github",
+        "ms-azuretools.vscode-docker",
+        "ms-toolsai.jupyter",
+        "ms-toolsai.jupyter-renderers",
+        "ms-toolsai.jupyter-keymap",
+        "eamodio.gitlens",
+        "Gydunhn.vsc-essentials",
+        "github.vscode-github-actions",
+        "redhat.vscode-yaml",
+        "ryu1kn.partial-diff",
+        "GitHub.copilot-chat",
+        "ms-python.pylint",
+        "esbenp.prettier-vscode"
+      ]
+    }
+  },
+  "initializeCommand": "mkdir -p ${localEnv:HOME}/.cache/pip || :",
+  "onCreateCommand": ".devcontainer/onCreateCommand.sh || :",
+  "postCreateCommand": "pip install -e .[test,dev,oracle,mlflow]"
 }
