@@ -1,3 +1,4 @@
+"root module for didas package"
 from collections import defaultdict
 from typing import Any, Dict, Type
 
@@ -13,6 +14,7 @@ except ImportError:
 
 
 def dic(o: Any) -> Dict[Type[Any], Dict[str, Any]]:
+    "extension of dir() that returns a dictionary of the object's attributes"
     r: Dict[Type[Any], Dict[str, Any]] = defaultdict(dict)
     for d in dir(o):
         a = getattr(o, d)

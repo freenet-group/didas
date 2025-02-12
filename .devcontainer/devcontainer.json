@@ -19,7 +19,6 @@
         "workbench.welcomePage.walkthroughs.openOnInstall": false,
         "python.defaultInterpreterPath": "/usr/local/bin/python",
         "flake8.args": ["--config=.github/linters/.flake8"],
-        "black-formatter.args": ["--config=.github/linters/.python-black"],
         "pylint.args": ["--rcfile=.github/linters/.python-lint"],
         "mypy.configFile": ".github/linters/.mypy.ini",
         "files.associations": {
@@ -72,6 +71,5 @@
     }
   },
   "initializeCommand": "mkdir -p ${localEnv:HOME}/.cache/pip || :",
-  "onCreateCommand": ".devcontainer/onCreateCommand.sh || :",
-  "postCreateCommand": "pip install -e .[test,dev,oracle,mlflow]"
+  "onCreateCommand": ".devcontainer/onCreateCommand.sh || :"
 }
