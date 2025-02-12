@@ -2,3 +2,4 @@
 disable=
     import-error,
     line-too-long,
+    wrong-import-order,
