@@ -79,7 +79,7 @@ def table_size(table_name: str, cur: Any) -> int:
         )
     )
     try:
-        return next(r)[0]
+        return int(next(r)[0])
     except StopIteration:
         return 0
 
