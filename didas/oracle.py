@@ -2,14 +2,13 @@
 import logging
 import os
 import warnings
-from math import ceil
 from typing import Any, Callable, Dict, Iterator, List, Optional, Set, Tuple, Union
 
 import numpy as np
 import pandas as pd
 from oracle_reseved_word_list import reserverd_words
 from pandas import DataFrame
-from sqlalchemy import String, create_engine, inspect, types
+from sqlalchemy import String, create_engine
 from sqlalchemy.engine import Connection, Engine
 from sqlalchemy.exc import DatabaseError
 from sqlalchemy.sql import text
