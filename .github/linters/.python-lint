@@ -1,3 +1,4 @@
 [MESSAGES CONTROL]
 disable=
-    import-error, 
+    import-error,
+    line-too-long,
