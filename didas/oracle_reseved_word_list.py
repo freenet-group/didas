@@ -1,4 +1,5 @@
 "This file contains a list of reserved words in Oracle SQL"
+
 from typing import Set
 
 reserverd_words: Set[str] = {
