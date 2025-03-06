@@ -1,3 +1,4 @@
+"this module provides utility functions for MLflow"
 import os
 from typing import Any, Dict, Optional
 
@@ -36,12 +37,18 @@ def set_google_tracking_token(
 
 def get_latest_versions(model_name: str) -> Dict[str, ModelVersion]:
     """Get the latest versions of a model."""
-    return {v.current_stage: v for v in mlflow.tracking.MlflowClient().get_latest_versions(model_name)}
+    return {
+        v.current_stage: v
+        for v in mlflow.tracking.MlflowClient().get_latest_versions(model_name)
+    }
 
 
 def get_latest_version(model_name: str) -> ModelVersion:
     """Get the latest version of a model."""
-    versions = {v.version: v for v in mlflow.tracking.MlflowClient().get_latest_versions(model_name)}
+    versions = {
+        v.version: v
+        for v in mlflow.tracking.MlflowClient().get_latest_versions(model_name)
+    }
     return versions[max(versions)]
 
 
@@ -49,11 +56,15 @@ def run_info(experiment_name: str) -> pd.DataFrame:
     """Get the run info for an experiment."""
     experiment_ids = {e.name: e.experiment_id for e in mlflow.search_experiments()}
     all_runs: list[Dict[str, Any]] = []
-    runs = mlflow.tracking.MlflowClient().search_runs([experiment_ids[experiment_name]], max_results=1000)
+    runs = mlflow.tracking.MlflowClient().search_runs(
+        [experiment_ids[experiment_name]], max_results=1000
+    )
     all_runs += [run.to_dictionary() for run in runs]
 
     while runs.token is not None:
-        runs = mlflow.tracking.MlflowClient().search_runs([experiment_ids[experiment_name]], page_token=runs.token)
+        runs = mlflow.tracking.MlflowClient().search_runs(
+            [experiment_ids[experiment_name]], page_token=runs.token
+        )
         all_runs += [run.to_dictionary() for run in runs]
 
     return pd.json_normalize(all_runs)

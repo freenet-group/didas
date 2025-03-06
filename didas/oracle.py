@@ -1,14 +1,14 @@
+"This module contains functions to interact with Oracle databases."
 import logging
 import os
 import warnings
-from math import ceil
 from typing import Any, Callable, Dict, Iterator, List, Optional, Set, Tuple, Union
 
 import numpy as np
 import pandas as pd
 from oracle_reseved_word_list import reserverd_words
 from pandas import DataFrame
-from sqlalchemy import String, create_engine, inspect, types
+from sqlalchemy import String, create_engine
 from sqlalchemy.engine import Connection, Engine
 from sqlalchemy.exc import DatabaseError
 from sqlalchemy.sql import text
@@ -44,9 +44,13 @@ def get_engine(
     if oracle_hosts is None:
         oracle_hosts = {v for k, v in os.environ.items() if k.startswith("ORACLE_HOST")}
     else:
-        oracle_hosts |= {v for k, v in os.environ.items() if k.startswith("ORACLE_HOST")}
+        oracle_hosts |= {
+            v for k, v in os.environ.items() if k.startswith("ORACLE_HOST")
+        }
     oracle_port = oracle_port if oracle_port else int(os.getenv("ORACLE_PORT", "1521"))
-    oracle_servicename = oracle_servicename if oracle_servicename else os.environ["ORACLE_SERVICE_NAME"]
+    oracle_servicename = (
+        oracle_servicename if oracle_servicename else os.environ["ORACLE_SERVICE_NAME"]
+    )
     assert len(oracle_hosts) > 0
     excs: Dict[str, DatabaseError] = {}
     for oracle_host in oracle_hosts:
@@ -75,7 +79,7 @@ def table_size(table_name: str, cur: Any) -> int:
         )
     )
     try:
-        return next(r)[0]
+        return int(next(r)[0])
     except StopIteration:
         return 0
 
@@ -111,9 +115,9 @@ def compress_table(
     )
     try:
         _, compress_for_now = next(r)
-    except StopIteration:
+    except StopIteration as e:
         if raise_if_not_exists:
-            raise ValueError(f"Table {table_name.upper()} does not exist")
+            raise ValueError(f"Table {table_name.upper()} does not exist") from e
         return None
 
     if compress_for_now != compress_for or force:
@@ -142,16 +146,25 @@ def get_columns(table_name: str, cur: Any) -> List[str]:
 
 def norm_str(k: str) -> str:
     """Normalize a string to a valid Oracle column name."""
-    K = k.replace(" ", "_").upper()
-    K = K.replace(".", "")
-    K = K.replace(":", "")
-    K = K.replace("-", "_")
-    K = K.replace("Ü", "UE")
-    K = K.replace("Ö", "OE")
-    K = K.replace("Ä", "AE")
-    K = "".join(filter(lambda x: x in "ABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789", K))
-    assert K not in reserverd_words
-    return K
+    replacements = {
+        " ": "_",
+        ".": "",
+        ":": "",
+        "-": "_",
+        "Ü": "UE",
+        "Ö": "OE",
+        "Ä": "AE",
+    }
+
+    k_upper = k.upper()
+    for old, new in replacements.items():
+        k_upper = k_upper.replace(old, new)
+
+    k_upper = "".join(
+        filter(lambda x: x in "ABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789", k_upper)
+    )
+    assert k_upper not in reserverd_words, f"The name '{k_upper}' is a reserved word."
+    return k_upper
 
 
 def norm_cols(df: DataFrame) -> None:
@@ -165,7 +178,12 @@ def compressed_method(
 ) -> Callable[[pd.DataFrame, Connection, List[str], Iterator[Tuple[Any, ...]]], None]:
     """Create a method that inserts data into a table in compressed mode."""
 
-    def compressed(pd_table: pd.DataFrame, conn: Connection, keys: List[str], data_iter: Iterator[Tuple[Any, ...]]) -> None:
+    def compressed(
+        pd_table: pd.DataFrame,
+        conn: Connection,
+        keys: List[str],
+        data_iter: Iterator[Tuple[Any, ...]],
+    ) -> None:
         table_name = pd_table.name.upper()
         if pd_table.schema:
             table_name = f"{pd_table.schema}.{pd_table.name}".upper()
@@ -173,10 +191,10 @@ def compressed_method(
         try:
             compress_table(table_name, cur, raise_if_not_exists=False)
             columns = get_columns(table_name, cur)
-            KEYS = [k.upper() for k in keys]
-            if len(set(KEYS) & set(columns)) > 0:
-                columns_in_keys = [c for c in columns if c in KEYS]
-                ix_pos = [KEYS.index(c) for c in columns_in_keys]
+            keys_upper = [k.upper() for k in keys]
+            if len(set(keys_upper) & set(columns)) > 0:
+                columns_in_keys = [c for c in columns if c in keys_upper]
+                ix_pos = [keys_upper.index(c) for c in columns_in_keys]
                 sql = f"""
                     insert /*+ append, parallel (AUTO) */ into {table_name}
                     ({', '.join(columns_in_keys)})
@@ -195,7 +213,13 @@ def compressed_method(
     return compressed
 
 
-def parallel(pd_table: Any, conn: Connection, keys: List[str], data_iter: Iterator[Tuple[Any, ...]]) -> None:
+def parallel(
+    pd_table: Any,
+    conn: Connection,
+    keys: List[str],
+    data_iter: Iterator[Tuple[Any, ...]],
+) -> None:
+    "deprecated, use execute_parallel_insert"
     warnings.warn(
         "The 'parallel' function is deprecated and will be removed in a future version. Please use 'execute_parallel_insert' or 'write_pandas_to_dwh' instead.",
         DeprecationWarning,
@@ -204,8 +228,13 @@ def parallel(pd_table: Any, conn: Connection, keys: List[str], data_iter: Iterat
     return execute_parallel_insert(pd_table, conn, keys, data_iter)
 
 
-def execute_parallel_insert(pd_table: Any, conn: Connection, keys: List[str], data_iter: Iterator[Tuple[Any, ...]]) -> None:
-    """Insert data into a table in parallel mode."""
+def execute_parallel_insert(
+    pd_table: Any,
+    conn: Connection,
+    keys: List[str],
+    data_iter: Iterator[Tuple[Any, ...]],
+) -> None:
+    """Insert data into a table in parallel mode. Can be used as 'method' in the 'to_sql' method of a Pandas DataFrame."""
     table_name = pd_table.name.upper()
     if pd_table.schema:
         table_name = f"{pd_table.schema}.{pd_table.name}".upper()
@@ -223,89 +252,6 @@ def execute_parallel_insert(pd_table: Any, conn: Connection, keys: List[str], da
 
 def typedict(df: DataFrame, string_length: int = 4000) -> Dict[str, String]:
     """Create a dictionary with the column names as keys and the types as values."""
-    return {c: String(string_length) for c, t in df.dtypes.items() if t == np.dtype("O")}
-
-
-def write_pandas_to_dwh(
-    df: pd.DataFrame,
-    table_name: str,
-    schema: Optional[str] = None,
-    create_table: bool = True,
-    engine: Optional[Engine] = None,
-    arraysize: int = 50000,
-    compress_for: Optional[str] = None,
-    grant_select_to: Optional[List[str]] = None,
-) -> bool:
-    """
-    Write a pandas DataFrame to an Oracle table.
-
-    Args:
-        df (pd.DataFrame): The DataFrame to write.
-        table_name (str): The table name to write to.
-        schema (Optional[str], optional): The schema. Defaults to None.
-                                          If None, the table is created in the default schema.
-                                          If set, the table_name will be updated to schema.table_name.
-        create_table (bool, optional): Create the table if it doesn't exist. Defaults to True.
-        engine (Optional[Engine], optional): The Oracle engine. Defaults to None.
-        arraysize (int, optional): The array size. Defaults to 50000.
-        compress_for (Optional[str], optional): Compress the table. Defaults to None.
-        grant_select_to (Optional[List[str]], optional): Grant select permissions to the given users. Defaults to None.
-
-    Returns:
-        bool: True if the operation was successful.
-    """
-    table_name = table_name.upper()
-    df.columns = df.columns.str.upper()
-    if engine is None:
-        engine = get_engine(arraysize=arraysize)
-    table_exists = inspect(engine).has_table(table_name)
-
-    if table_exists and create_table:
-        logger.error(f"Table {table_name} exists, please delete first.")
-        return False
-
-    elif create_table:
-        d_types = {c: types.VARCHAR(min(df[c].str.len().max(), 127)) for c in df.columns[df.dtypes == "object"].tolist()}
-        # Create the table if it doesn't exist
-        df.head(0).to_sql(table_name, con=engine, schema=schema, if_exists="fail", index=False, dtype=d_types)
-        logger.info(f"Table {table_name} created.")
-        # Commit the transaction to ensure the table is created
-        with engine.connect() as conn:
-            conn.connection.commit()
-
-    columns = df.columns
-    column_names = ", ".join(str(c) for c in columns)
-    column_values = ", ".join(f":{c}" for c in columns)
-
-    if schema:
-        table_name = f"{schema.upper()}.{table_name}"
-    sql_insert = f"INSERT /*+ parallel (AUTO) */ INTO {table_name} ({column_names}) VALUES ({column_values})"
-    batch_size = 100000
-    number_of_batches = ceil(len(df) / batch_size)
-    with engine.connect() as conn:
-        cursor = conn.connection.cursor()
-
-        for batch_df in tqdm(np.array_split(df, number_of_batches), total=number_of_batches):
-            data_to_insert = batch_df.replace({np.nan: None}).to_dict(orient="records")
-            try:
-                cursor.executemany(sql_insert, data_to_insert)
-            except Exception as e:
-                logger.error(f"Failed Insert SQL: {sql_insert} with error: {e}")
-                return False
-
-            conn.connection.commit()
-
-        if compress_for is not None:
-            logger.info("Compressing table...")
-            try:
-                compress_table(table_name=table_name, cur=cursor, compress_for=compress_for)
-            finally:
-                cursor.close()
-        else:
-            cursor.close()
-        # Optionally, grant select permissions
-        if grant_select_to is not None:
-            for user in grant_select_to:
-                logger.info(f"Granting SELECT permissions to {user}")
-                conn.execute(text(f"GRANT SELECT ON {table_name} TO {user}"))
-    return True
+    return {
+        c: String(string_length) for c, t in df.dtypes.items() if t == np.dtype("O")
+    }
