@@ -44,10 +44,6 @@ def get_engine(
     oracle_password = oracle_password if oracle_password else os.environ["ORACLE_PASS"]
     if oracle_hosts is None:
         oracle_hosts = {v for k, v in os.environ.items() if k.startswith("ORACLE_HOST")}
-    else:
-        oracle_hosts |= {
-            v for k, v in os.environ.items() if k.startswith("ORACLE_HOST")
-        }
     oracle_port = oracle_port if oracle_port else int(os.getenv("ORACLE_PORT", "1521"))
     oracle_servicename = (
         oracle_servicename if oracle_servicename else os.environ["ORACLE_SERVICE_NAME"]
