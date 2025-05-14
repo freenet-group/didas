@@ -22,12 +22,12 @@ jobs:
         with:
           fetch-depth: 0
       - name: Lint GitHub Actions
-        uses: super-linter/super-linter@v7.3.0
+        uses: super-linter/super-linter@v7.4.0
         env:
           FILTER_REGEX_INCLUDE: .*github/workflows/.*
       - run: git diff --exit-code
       - name: Lint Code Base
-        uses: super-linter/super-linter@v7.3.0
+        uses: super-linter/super-linter@v7.4.0
       - run: git diff --exit-code
         if: ${{ github.event_name != 'pull_request' }}
       - run: git config --global user.email ${{ github.actor }}@users.noreply.github.com
