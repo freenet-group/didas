@@ -45,7 +45,9 @@ def get_engine(
     if oracle_hosts is None:
         oracle_hosts = {v for k, v in os.environ.items() if k.startswith("ORACLE_HOST")}
     oracle_port = oracle_port if oracle_port else int(os.getenv("ORACLE_PORT", "1521"))
-    oracle_servicename = oracle_servicename if oracle_servicename else os.environ["ORACLE_SERVICE_NAME"]
+    oracle_servicename = (
+        oracle_servicename if oracle_servicename else os.environ["ORACLE_SERVICE_NAME"]
+    )
     assert len(oracle_hosts) > 0
     excs: Dict[str, DatabaseError] = {}
     for oracle_host in oracle_hosts:
@@ -155,7 +157,9 @@ def norm_str(k: str) -> str:
     for old, new in replacements.items():
         k_upper = k_upper.replace(old, new)
 
-    k_upper = "".join(filter(lambda x: x in "ABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789", k_upper))
+    k_upper = "".join(
+        filter(lambda x: x in "ABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789", k_upper)
+    )
     assert k_upper not in reserverd_words, f"The name '{k_upper}' is a reserved word."
     return k_upper
 
@@ -245,4 +249,6 @@ def execute_parallel_insert(
 
 def typedict(df: DataFrame, string_length: int = 4000) -> Dict[str, String]:
     """Create a dictionary with the column names as keys and the types as values."""
-    return {c: String(string_length) for c, t in df.dtypes.items() if t == np.dtype("O")}
+    return {
+        c: String(string_length) for c, t in df.dtypes.items() if t == np.dtype("O")
+    }
