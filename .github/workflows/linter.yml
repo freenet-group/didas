@@ -22,16 +22,20 @@ jobs:
         with:
           fetch-depth: 0
       - name: Lint GitHub Actions
-        uses: super-linter/super-linter@v8.3.1
+        uses: super-linter/super-linter@47984f49b4e87383eed97890fe2dca6063bbd9c3 # v8.3.1
         env:
           FILTER_REGEX_INCLUDE: .*github/workflows/.*
       - run: git diff --exit-code
       - name: Lint Code Base
-        uses: super-linter/super-linter@v8.3.1
+        uses: super-linter/super-linter@47984f49b4e87383eed97890fe2dca6063bbd9c3 # v8.3.1
       - run: git diff --exit-code
         if: ${{ github.event_name != 'pull_request' }}
-      - run: git config --global user.email ${{ github.actor }}@users.noreply.github.com
-      - run: git config --global user.name ${{ github.actor }}
+      - run: git config --global user.email "$GH_ACTOR@users.noreply.github.com"
+        env:
+          GH_ACTOR: ${{ github.actor }}
+      - run: git config --global user.name "$GH_ACTOR"
+        env:
+          GH_ACTOR: ${{ github.actor }}
       - run: git checkout "$GITHUB_HEAD_REF"
         if: ${{ github.event_name == 'pull_request' }}
       - run: git branch --set-upstream-to=origin/"$GITHUB_HEAD_REF"
