@@ -78,6 +78,7 @@ jobs:
       FIX_PYTHON_BLACK: true
       FIX_PYTHON_ISORT: true
       FIX_PYTHON_RUFF: true
+      FIX_PYTHON_RUFF_FORMAT: true
       FIX_RUBY: true
       FIX_RUST_2015: true
       FIX_RUST_2018: true
