@@ -194,8 +194,8 @@ def compressed_method(
                 ix_pos = [keys_upper.index(c) for c in columns_in_keys]
                 sql = f"""
                     insert /*+ append, parallel (AUTO) */ into {table_name}
-                    ({', '.join(columns_in_keys)})
-                    values (:{', :'.join([str(ix) for ix in range(len(columns_in_keys))])})"""
+                    ({", ".join(columns_in_keys)})
+                    values (:{", :".join([str(ix) for ix in range(len(columns_in_keys))])})"""
                 data = []
                 for d in tqdm(data_iter, disable=disable):
                     data.append([d[ix] for ix in ix_pos])
@@ -237,8 +237,8 @@ def execute_parallel_insert(
         table_name = f"{pd_table.schema}.{pd_table.name}".upper()
     sql = f"""
         insert /*+ parallel (AUTO) */ into {table_name}
-        ({', '.join(keys)})
-        values (:{', :'.join([str(ix) for ix in range(len(keys))])})
+        ({", ".join(keys)})
+        values (:{", :".join([str(ix) for ix in range(len(keys))])})
     """
     cur = conn.connection.cursor()
     try:
